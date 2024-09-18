@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 配置文件解析
@@ -23,16 +24,7 @@ public class CsvConfigUtil {
 
     private static final String CONFIG_FILE_NAME = "config.csv";
 
-    /**
-     * 获取配置项
-     * @return
-     * @throws IOException
-     */
-    public static synchronized List<ConfigItem> getConfigItems() {
-        if (configItems != null && configItems.size() > 0) {
-            return configItems;
-        }
-
+    private static synchronized void init(){
         String fileName = CONFIG_FILE_NAME;
         System.out.println(">>>>>>开始读取配置");
         try (InputStream inputStream = CsvConfigUtil.class.getClassLoader().getResourceAsStream(fileName);
@@ -58,7 +50,28 @@ public class CsvConfigUtil {
             throw new RuntimeException("加载配置文件发生异常", e);
         }
         System.out.println("<<<<<<读取完成");
+    }
+
+
+    /**
+     * 获取配置项
+     * @return
+     * @throws IOException
+     */
+    public static synchronized List<ConfigItem> getConfigItems() {
+        if (configItems.size() == 0) {
+            init();
+        }
         return configItems;
     }
 
+    public static List<ConfigItem> getConfigItemsByName(List<String> names) {
+        List<ConfigItem> list = getConfigItems();
+
+        List<ConfigItem> resultList = list.stream()
+                .filter(a -> names.contains(a.getLabel()))
+                .collect(Collectors.toList());
+
+        return resultList;
+    }
 }

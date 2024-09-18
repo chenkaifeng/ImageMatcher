@@ -2,10 +2,13 @@ package com.kfc.image;
 
 import com.kfc.image.domain.ConfigItem;
 import com.kfc.image.utils.CsvConfigUtil;
+import com.kfc.image.utils.ImageMatcher;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -14,7 +17,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,7 +42,7 @@ public class ImageMatcherJavaFXApp extends Application {
         imageView.setFitHeight(150);
         imageView.setPreserveRatio(true);
 
-        Label instructions = new Label("请选择以下选项:");
+        Label instructions = new Label("请选择你想查的场景:");
         instructions.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
         List<ConfigItem> configItems = CsvConfigUtil.getConfigItems();
@@ -48,22 +54,32 @@ public class ImageMatcherJavaFXApp extends Application {
 
         Button confirmButton = new Button("确定");
 
+
         chooseButton.setOnAction(e -> {
             File file = fileChooser.showOpenDialog(primaryStage);
             if (file != null) {
                 Image image = new Image(file.toURI().toString());
                 imageView.setImage(image);
+
+                chooseButton.setText(file.getAbsolutePath());
             }
         });
 
         confirmButton.setOnAction(e -> {
-            StringBuilder selectedOptions = new StringBuilder("选择的选项:\n");
+            List<String> chooseScene = new ArrayList<>();
             for (CheckBox checkBox : checkBoxes) {
                 if (checkBox.isSelected()) {
-                    selectedOptions.append(checkBox.getText()).append("\n");
+                    chooseScene.add(checkBox.getText());
                 }
             }
-            alert(selectedOptions.toString());
+
+            if(chooseScene.size() == 0){
+                alert("至少选择一个场景！");
+                return;
+            }
+            List<ConfigItem> itemList = CsvConfigUtil.getConfigItemsByName(chooseScene);
+            List<String> resultList = ImageMatcher.match(itemList, chooseButton.getText());
+            showImages(resultList);
         });
 
         grid.add(chooseButton, 0, 0);
@@ -83,6 +99,41 @@ public class ImageMatcherJavaFXApp extends Application {
         alert.setHeaderText(null);
         alert.setContentText(info);
         alert.showAndWait();
+    }
+
+    private void showImages(List<String> imagePaths) {
+        /*Stage imageStage = new Stage();
+        VBox imageBox = new VBox(10); // 10 像素的间距
+
+        for (String path : imagePaths) {
+            Image image = new Image("file:" + path); // 使用 file: 前缀
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(200); // 设置宽度
+            imageView.setPreserveRatio(true); // 保持纵横比
+            imageBox.getChildren().add(imageView);
+        }
+
+        Scene imageScene = new Scene(imageBox, 220, 400);
+        imageStage.setScene(imageScene);
+        imageStage.setTitle("图片窗口");
+        imageStage.show();*/
+
+        for (String imagePath : imagePaths) {
+            openImage(imagePath);
+        }
+    }
+
+    private void openImage(String imagePath) {
+        try {
+            File imageFile = new File(imagePath);
+            if (Desktop.isDesktopSupported() && imageFile.exists()) {
+                Desktop.getDesktop().open(imageFile);
+            } else {
+                System.out.println("桌面不支持或文件不存在。");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {

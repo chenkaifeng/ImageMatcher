@@ -31,7 +31,7 @@
         <!-- 根据需要添加其他模块 -->
     </dependencies>
 
-    <build>
+    <!--<build>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -42,5 +42,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
 </project>
