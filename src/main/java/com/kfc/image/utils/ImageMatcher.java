@@ -7,6 +7,7 @@ import org.opencv.features2d.*;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,12 +36,16 @@ public class ImageMatcher {
      * @param smallFilePath 待匹配文件路径
      * @return  结果文件路径列表
      */
-    public static List<ResultItem> match(List<ConfigItem> itemList, String smallFilePath){
+    public static List<ResultItem> match(List<ConfigItem> itemList, String smallFilePath) throws IOException {
+
+        smallFilePath = FileUtil.copyAndRenameSmallImage(smallFilePath);
+
         List<ResultItem> resultList = new ArrayList<>();
         String baseLargeFilePath = SaveDirUtils.getSceneImageDir();
 
         for (ConfigItem configItem : itemList) {
-            System.out.println("当前场景: " + configItem.getLabel());
+            System.out.println(">>>匹配开始，当前场景: " + configItem.getLabel());
+            long curtime = System.currentTimeMillis();
             String largeFilePath = baseLargeFilePath + File.separator + configItem.getFilename();
             String outputFilePath = SaveDirUtils.getOutputImageDir() + File.separator + "result_" + configItem.getFilename();
 
@@ -52,7 +57,10 @@ public class ImageMatcher {
             resultItem.setMatchRate(matchRate);
 
             resultList.add(resultItem);
+            System.out.println("<<<场景结束: " + configItem.getLabel() + "，耗时" + (System.currentTimeMillis() - curtime) + "毫秒");
         }
+
+        FileUtil.delete(smallFilePath);
 
         // 按匹配率降序排序
         List<ResultItem> sortedResult = resultList.stream()

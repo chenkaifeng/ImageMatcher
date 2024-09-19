@@ -3,6 +3,9 @@ package com.kfc.image.utils;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * 文件工具类
@@ -30,6 +33,34 @@ public class FileUtil {
             System.out.println("目录已存在: " + dirPath);
         }
     }
+
+    /**
+     * 删除文件
+     * @param filePath
+     */
+    public static void delete(String filePath){
+        File file = new File(filePath);
+        file.delete();
+    }
+
+    /**
+     * 重命名并复制待匹配图片
+     * @param oriPath
+     */
+    public static String copyAndRenameSmallImage(String oriPath) throws IOException {
+
+        String fileFormat = oriPath.split("\\.")[1];
+        String fileName = "" + System.currentTimeMillis();
+        String newSmallFilePath = SaveDirUtils.getMatchImageDir() + File.separator + fileName + "." + fileFormat;
+
+        Path sourcePath = Paths.get(oriPath); // 源文件路径
+        Path destinationPath = Paths.get(newSmallFilePath); // 目标文件路径
+
+        Files.copy(sourcePath, destinationPath);
+        return newSmallFilePath;
+    }
+
+
 
     /**
      * 打开图片

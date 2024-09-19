@@ -5,17 +5,17 @@ import com.kfc.image.domain.ResultItem;
 import com.kfc.image.utils.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 import java.io.File;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,16 +41,24 @@ public class ImageMatcherJavaFXApp extends Application {
         Label instructions = new Label("请选择你想查的场景:");
         instructions.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
-        SaveDirUtils.initDir();
 
+        Label imagePath = new Label();
+        imagePath.setStyle("-fx-font-size: 10px;");
+
+
+
+        //初始化
         List<ConfigItem> configItems = CsvConfigUtil.getConfigItems();
+        SaveDirUtils.initDir(configItems);
+
+
         CheckBox[] checkBoxes = new CheckBox[configItems.size()];
         for (int i = 0; i < checkBoxes.length; i++) {
             checkBoxes[i] = new CheckBox(configItems.get(i).getLabel());
             grid.add(checkBoxes[i], i % 3, (i / 3) + 2); // 更新位置，留出空间给说明
         }
 
-        Button confirmButton = new Button("确定");
+        Button confirmButton = new Button("开始匹配");
 
 
         chooseButton.setOnAction(e -> {
@@ -59,31 +67,38 @@ public class ImageMatcherJavaFXApp extends Application {
                 Image image = new Image(file.toURI().toString());
                 imageView.setImage(image);
 
-                chooseButton.setText(file.getAbsolutePath());
+                imagePath.setText(file.getAbsolutePath());
             }
         });
 
         confirmButton.setOnAction(e -> {
-            List<String> chooseScene = new ArrayList<>();
-            for (CheckBox checkBox : checkBoxes) {
-                if (checkBox.isSelected()) {
-                    chooseScene.add(checkBox.getText());
+            try {
+                List<String> chooseScene = new ArrayList<>();
+                for (CheckBox checkBox : checkBoxes) {
+                    if (checkBox.isSelected()) {
+                        chooseScene.add(checkBox.getText());
+                    }
                 }
+
+                if (chooseScene.size() == 0) {
+                    alert("至少选择一个场景！");
+                    return;
+                }
+                List<ConfigItem> itemList = CsvConfigUtil.getConfigItemsByName(chooseScene);
+                List<ResultItem> resultList = ImageMatcher.match(itemList, imagePath.getText());
+                showImages(resultList);
+            } catch (Exception ex){
+                ex.printStackTrace();
+                alert("匹配中出现异常:" + ex.getLocalizedMessage());
             }
 
-            if (chooseScene.size() == 0) {
-                alert("至少选择一个场景！");
-                return;
-            }
-            List<ConfigItem> itemList = CsvConfigUtil.getConfigItemsByName(chooseScene);
-            List<ResultItem> resultList = ImageMatcher.match(itemList, chooseButton.getText());
-            showImages(resultList);
         });
 
         grid.add(chooseButton, 0, 0);
         grid.add(instructions, 0, 1, 3, 1); // 添加说明
-        grid.add(imageView, 0, 8, 3, 1); // 图片显示在最后一行
-        grid.add(confirmButton, 0, 9, 3, 1); // 确定按钮
+        grid.add(imageView, 0, 8, 3, 1); // 图片显示
+        grid.add(imagePath, 0, 9, 3, 1);
+        grid.add(confirmButton, 0, 10, 3, 1); // 确定按钮
 
         Scene scene = new Scene(grid, 400, 500);
         primaryStage.setScene(scene);
@@ -93,7 +108,7 @@ public class ImageMatcherJavaFXApp extends Application {
 
     private void alert(String info) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("选项选择");
+        alert.setTitle("提示");
         alert.setHeaderText(null);
         alert.setContentText(info);
         alert.showAndWait();
@@ -104,10 +119,7 @@ public class ImageMatcherJavaFXApp extends Application {
         stringBuilder.append("最佳匹配：" + resultItems.get(0).getLabel() + "\n");
         stringBuilder.append("完整匹配率如下：\n");
         for (ResultItem resultItem : resultItems) {
-
-
             stringBuilder.append(resultItem.getLabel() + "：" + StringUtil.percentFormat(resultItem.getMatchRate()) + "\n");
-            //FileUtil.openImage(resultItem.getOutputFilePath());
         }
         alert(stringBuilder.toString());
 

@@ -6,6 +6,7 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +19,13 @@ public class CompressImageUtil {
 
     public static void main(String[] args) {
 
-        String filePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\scene\\hgs.jpg";
+        String filePath = SaveDirUtils.getSceneImageDir() + File.separator + "hys.jpg";
 
         //缩放比例
-        double scale = 1.5;
+        double scale = 1.1;
 
 
-        String outputFilePath = filePath.replace(".jpg", "") + scale + ".jpg";
-
+        String outputFilePath = filePath.replace(".jpg", "") + StringUtil.formatDouble(scale) + ".jpg";
 
 
         Mat originalImage = Imgcodecs.imread(filePath);
