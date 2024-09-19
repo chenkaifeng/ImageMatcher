@@ -1,6 +1,8 @@
 package com.kfc.image.utils;
 
+import com.kfc.image.cache.OpenCVDetectCache;
 import com.kfc.image.domain.ConfigItem;
+import com.kfc.image.domain.OpenCVDetectResult;
 import com.kfc.image.domain.ResultItem;
 import org.opencv.core.*;
 import org.opencv.features2d.*;
@@ -8,9 +10,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ImageMatcher {
@@ -19,6 +19,9 @@ public class ImageMatcher {
         // 加载OpenCV库
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
+
+
+
 
     public static void main(String[] args) {
 
@@ -89,18 +92,23 @@ public class ImageMatcher {
         // 创建 FLANN 匹配器
         FlannBasedMatcher matcher = FlannBasedMatcher.create();
 
-        // 检测特征点和计算描述符
-        MatOfKeyPoint keypointsLarge = new MatOfKeyPoint();
-        Mat descriptorsLarge = new Mat();
-        detector.detectAndCompute(largeImage, new Mat(), keypointsLarge, descriptorsLarge);
+        // 检测大图特征点和计算描述符
+        long time = System.currentTimeMillis();
+        OpenCVDetectResult openCVDetectResult = OpenCVDetectCache.getDetectResult(largeFilePath, detector, largeImage);
+        MatOfKeyPoint keypointsLarge = openCVDetectResult.getMatOfKeyPoint();
+        Mat descriptorsLarge = openCVDetectResult.getDescriptor();
+        System.out.println("场景图detectAndCompute耗时" + (System.currentTimeMillis() - time) + "ms");
 
+        // 检测小图特征点和计算描述符
         MatOfKeyPoint keypointsSmall = new MatOfKeyPoint();
         Mat descriptorsSmall = new Mat();
         detector.detectAndCompute(smallImage, new Mat(), keypointsSmall, descriptorsSmall);
 
         // 匹配描述符
+        time = System.currentTimeMillis();
         List<MatOfDMatch> matches = new ArrayList<>();
         matcher.knnMatch(descriptorsSmall, descriptorsLarge, matches, 2);
+        System.out.println("knnMatch耗时" + (System.currentTimeMillis() - time) + "ms");
 
         // 过滤匹配结果
         float ratioThresh = 0.75f;
@@ -127,9 +135,9 @@ public class ImageMatcher {
         // 在最后，添加以下代码以释放内存
         largeImage.release();
         smallImage.release();
-        keypointsLarge.release();
+        //keypointsLarge.release();缓存了不释放
         keypointsSmall.release();
-        descriptorsLarge.release();
+        //descriptorsLarge.release();缓存了不释放
         descriptorsSmall.release();
         outputImg.release();
 
