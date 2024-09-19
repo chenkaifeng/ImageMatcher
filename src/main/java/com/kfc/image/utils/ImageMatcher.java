@@ -80,7 +80,7 @@ public class ImageMatcher {
         Mat smallImage = Imgcodecs.imread(smallFilePath);
 
         // 创建SIFT检测器
-        Feature2D detector = SIFT.create(0, 3, 0.04, 10, 1.6);  // 自定义参数
+        Feature2D detector = SIFT.create(0, 4, 0.03, 10, 1.6);  // 自定义参数
         //Feature2D detector = SIFT.create();
         // 创建 ORB 对象
         //ORB orb = ORB.create();
