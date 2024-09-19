@@ -80,7 +80,8 @@ public class ImageMatcher {
         Mat smallImage = Imgcodecs.imread(smallFilePath);
 
         // 创建SIFT检测器
-        Feature2D detector = SIFT.create();
+        Feature2D detector = SIFT.create(0, 3, 0.04, 10, 1.6);  // 自定义参数
+        //Feature2D detector = SIFT.create();
         // 创建 ORB 对象
         //ORB orb = ORB.create();
         //DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE);
@@ -96,13 +97,6 @@ public class ImageMatcher {
         MatOfKeyPoint keypointsSmall = new MatOfKeyPoint();
         Mat descriptorsSmall = new Mat();
         detector.detectAndCompute(smallImage, new Mat(), keypointsSmall, descriptorsSmall);
-
-
-        // 将描述符转换为 CV_32F 类型
-        //descriptorsLarge.convertTo(descriptorsLarge, CvType.CV_32F);
-        //descriptorsSmall.convertTo(descriptorsSmall, CvType.CV_32F);
-        //descriptorsLarge.convertTo(descriptorsLarge, CvType.CV_32F);
-        //descriptorsSmall.convertTo(descriptorsSmall, CvType.CV_32F);
 
         // 匹配描述符
         List<MatOfDMatch> matches = new ArrayList<>();
@@ -128,6 +122,16 @@ public class ImageMatcher {
 
         // 保存输出图像
         Imgcodecs.imwrite(outputFilePath, outputImg);
+
+
+        // 在最后，添加以下代码以释放内存
+        largeImage.release();
+        smallImage.release();
+        keypointsLarge.release();
+        keypointsSmall.release();
+        descriptorsLarge.release();
+        descriptorsSmall.release();
+        outputImg.release();
 
         System.out.println("Matching completed.匹配率=" + matchRate);
         return matchRate;

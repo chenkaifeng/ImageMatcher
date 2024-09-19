@@ -19,10 +19,10 @@ public class CompressImageUtil {
 
     public static void main(String[] args) {
 
-        String filePath = SaveDirUtils.getSceneImageDir() + File.separator + "hys.jpg";
+        String filePath = SaveDirUtils.getSceneImageDir() + File.separator + "dtd.jpg";
 
         //缩放比例
-        double scale = 1.1;
+        double scale = 1.5;
 
 
         String outputFilePath = filePath.replace(".jpg", "") + StringUtil.formatDouble(scale) + ".jpg";
