@@ -1,14 +1,16 @@
 package com.kfc.image.utils;
 
 import com.kfc.image.domain.ConfigItem;
+import com.kfc.image.domain.ResultItem;
 import org.opencv.core.*;
 import org.opencv.features2d.*;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImageMatcher {
 
@@ -19,30 +21,47 @@ public class ImageMatcher {
 
     public static void main(String[] args) {
 
-        String largeFilePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\scene\\hc2.jpg";
-        String smallFilePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\20240918232208.png";
-
-        String outputFilePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\output_image.jpg";
+        String largeFilePath = SaveDirUtils.getSceneImageDir() + File.separator + "hgs1.5.jpg";
+        String smallFilePath = SaveDirUtils.getMatchImageDir() + File.separator + "20240918223723.png";
+        String outputFilePath = SaveDirUtils.getOutputImageDir() + File.separator + "output.jpg";
         match(largeFilePath, smallFilePath, outputFilePath);
 
-
+        FileUtil.openImage(outputFilePath);
     }
 
-    public static List<String> match(List<ConfigItem> itemList, String smallFilePath){
-        List<String> resultList = new ArrayList<>();
-        String baseLargeFilePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\scene";
+    /**
+     * 进行匹配
+     * @param itemList  场景列表（大图）
+     * @param smallFilePath 待匹配文件路径
+     * @return  结果文件路径列表
+     */
+    public static List<ResultItem> match(List<ConfigItem> itemList, String smallFilePath){
+        List<ResultItem> resultList = new ArrayList<>();
+        String baseLargeFilePath = SaveDirUtils.getSceneImageDir();
+
         for (ConfigItem configItem : itemList) {
             System.out.println("当前场景: " + configItem.getLabel());
             String largeFilePath = baseLargeFilePath + File.separator + configItem.getFilename();
-            String outputFilePath = baseLargeFilePath + File.separator + "result" + File.separator + "result_" + configItem.getFilename();
+            String outputFilePath = SaveDirUtils.getOutputImageDir() + File.separator + "result_" + configItem.getFilename();
 
-            match(largeFilePath, smallFilePath, outputFilePath);
-            resultList.add(outputFilePath);
+            double matchRate = match(largeFilePath, smallFilePath, outputFilePath);
+
+            ResultItem resultItem = new ResultItem();
+            resultItem.setOutputFilePath(outputFilePath);
+            resultItem.setLabel(configItem.getLabel());
+            resultItem.setMatchRate(matchRate);
+
+            resultList.add(resultItem);
         }
-        return resultList;
+
+        // 按匹配率降序排序
+        List<ResultItem> sortedResult = resultList.stream()
+                .sorted(Comparator.comparing(ResultItem::getMatchRate).reversed())
+                .collect(Collectors.toList());
+        return sortedResult;
 
     }
-    public static void match(String largeFilePath, String smallFilePath, String outputFilePath) {
+    public static double match(String largeFilePath, String smallFilePath, String outputFilePath) {
 
         System.out.println("largeFilePath: " + largeFilePath);
         System.out.println("smallFilePath: " + smallFilePath);
@@ -91,6 +110,9 @@ public class ImageMatcher {
             }
         }
 
+        //计算匹配率
+        double matchRate = (double) goodMatchesList.size() / keypointsSmall.toArray().length;
+
         // 绘制匹配结果
         Mat outputImg = new Mat();
         Features2d.drawMatches(smallImage, keypointsSmall, largeImage, keypointsLarge,
@@ -99,7 +121,8 @@ public class ImageMatcher {
         // 保存输出图像
         Imgcodecs.imwrite(outputFilePath, outputImg);
 
-        System.out.println("Matching completed.");
+        System.out.println("Matching completed.匹配率=" + matchRate);
+        return matchRate;
     }
 }
 

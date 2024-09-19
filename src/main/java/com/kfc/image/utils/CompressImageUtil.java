@@ -19,9 +19,14 @@ public class CompressImageUtil {
     public static void main(String[] args) {
 
         String filePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\scene\\hgs.jpg";
-        String outputFilePath = "C:\\Users\\kfc\\Pictures\\large-small-image\\scene\\hgs1.5.jpg";
 
+        //缩放比例
         double scale = 1.5;
+
+
+        String outputFilePath = filePath.replace(".jpg", "") + scale + ".jpg";
+
+
 
         Mat originalImage = Imgcodecs.imread(filePath);
         Mat resizedImage = new Mat();
@@ -29,7 +34,7 @@ public class CompressImageUtil {
 
 
         Imgcodecs.imwrite(outputFilePath, resizedImage);
-        System.out.println("压缩完成");
+        System.out.println("压缩完成：" + outputFilePath);
 
     }
 }

@@ -1,25 +1,21 @@
 package com.kfc.image;
 
 import com.kfc.image.domain.ConfigItem;
-import com.kfc.image.utils.CsvConfigUtil;
-import com.kfc.image.utils.ImageMatcher;
+import com.kfc.image.domain.ResultItem;
+import com.kfc.image.utils.*;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +40,8 @@ public class ImageMatcherJavaFXApp extends Application {
 
         Label instructions = new Label("请选择你想查的场景:");
         instructions.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        SaveDirUtils.initDir();
 
         List<ConfigItem> configItems = CsvConfigUtil.getConfigItems();
         CheckBox[] checkBoxes = new CheckBox[configItems.size()];
@@ -73,12 +71,12 @@ public class ImageMatcherJavaFXApp extends Application {
                 }
             }
 
-            if(chooseScene.size() == 0){
+            if (chooseScene.size() == 0) {
                 alert("至少选择一个场景！");
                 return;
             }
             List<ConfigItem> itemList = CsvConfigUtil.getConfigItemsByName(chooseScene);
-            List<String> resultList = ImageMatcher.match(itemList, chooseButton.getText());
+            List<ResultItem> resultList = ImageMatcher.match(itemList, chooseButton.getText());
             showImages(resultList);
         });
 
@@ -101,40 +99,21 @@ public class ImageMatcherJavaFXApp extends Application {
         alert.showAndWait();
     }
 
-    private void showImages(List<String> imagePaths) {
-        /*Stage imageStage = new Stage();
-        VBox imageBox = new VBox(10); // 10 像素的间距
+    private void showImages(List<ResultItem> resultItems) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("最佳匹配：" + resultItems.get(0).getLabel() + "\n");
+        stringBuilder.append("完整匹配率如下：\n");
+        for (ResultItem resultItem : resultItems) {
 
-        for (String path : imagePaths) {
-            Image image = new Image("file:" + path); // 使用 file: 前缀
-            ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(200); // 设置宽度
-            imageView.setPreserveRatio(true); // 保持纵横比
-            imageBox.getChildren().add(imageView);
+
+            stringBuilder.append(resultItem.getLabel() + "：" + StringUtil.percentFormat(resultItem.getMatchRate()) + "\n");
+            //FileUtil.openImage(resultItem.getOutputFilePath());
         }
+        alert(stringBuilder.toString());
 
-        Scene imageScene = new Scene(imageBox, 220, 400);
-        imageStage.setScene(imageScene);
-        imageStage.setTitle("图片窗口");
-        imageStage.show();*/
-
-        for (String imagePath : imagePaths) {
-            openImage(imagePath);
-        }
+        FileUtil.openImage(resultItems.get(0).getOutputFilePath());
     }
 
-    private void openImage(String imagePath) {
-        try {
-            File imageFile = new File(imagePath);
-            if (Desktop.isDesktopSupported() && imageFile.exists()) {
-                Desktop.getDesktop().open(imageFile);
-            } else {
-                System.out.println("桌面不支持或文件不存在。");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
         launch(args);
