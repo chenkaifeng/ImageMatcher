@@ -64,7 +64,7 @@ public class SaveDirUtils {
         //初始化场景文件
         for (ConfigItem configItem : configItems) {
             String fileName = configItem.getFilename();
-            String classPathFile = "scene" + File.separator + fileName;
+            String classPathFile = "scene/" + fileName;
             try (InputStream inputStream = CsvConfigUtil.class.getClassLoader().getResourceAsStream(classPathFile)) {
                 if (inputStream != null) {
                     // 目标路径，替换为你要拷贝到的目录

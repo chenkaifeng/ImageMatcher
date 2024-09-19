@@ -2,7 +2,7 @@
 setlocal
 
 :: 设置 Java 运行时环境
-set JAVA_HOME=C:\Program Files\Java\bellsoft-jdk11.0.24+9-windows-amd64\jdk-11.0.24
+set JAVA_HOME=bellsoft-jdk11.0.24+9-windows-amd64\jdk-11.0.24
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 :: 初始化类路径
@@ -21,7 +21,7 @@ set "CLASSPATH=lib\image-matcher-1.0-SNAPSHOT.jar;%CLASSPATH%"
 echo CLASSPATH: %CLASSPATH%
 
 :: 执行 Java 应用程序
-java --module-path "D:\Program Files\javafx-sdk-17.0.12\lib" --add-modules javafx.controls,javafx.fxml -cp "%CLASSPATH%" com.kfc.image.ImageMatcherJavaFXLauncher
+java --module-path "javafx-sdk-17.0.12\lib" --add-modules javafx.controls,javafx.fxml -cp "%CLASSPATH%" com.kfc.image.ImageMatcherJavaFXLauncher
 
 :: 按任意键继续
 pause
