@@ -52,11 +52,22 @@ public class ImageMatcherJavaFXApp extends Application {
         SaveDirUtils.initDir(configItems);
 
 
+
         CheckBox[] checkBoxes = new CheckBox[configItems.size()];
         for (int i = 0; i < checkBoxes.length; i++) {
             checkBoxes[i] = new CheckBox(configItems.get(i).getLabel());
             grid.add(checkBoxes[i], i % 3, (i / 3) + 2); // 更新位置，留出空间给说明
         }
+
+        // 全选/全不选复选框
+        CheckBox selectAllCheckBox = new CheckBox("全选/全不选");
+        selectAllCheckBox.setOnAction(event -> {
+            boolean isSelected = selectAllCheckBox.isSelected();
+            for (CheckBox checkBox : checkBoxes) {
+                checkBox.setSelected(isSelected);
+            }
+        });
+
 
         Button confirmButton = new Button("开始匹配");
 
@@ -85,7 +96,7 @@ public class ImageMatcherJavaFXApp extends Application {
                     return;
                 }
                 List<ConfigItem> itemList = CsvConfigUtil.getConfigItemsByName(chooseScene);
-                List<ResultItem> resultList = ImageMatcher.match(itemList, imagePath.getText());
+                List<ResultItem> resultList = ImageMatcher.matchForEach(itemList, imagePath.getText());
                 showImages(resultList);
             } catch (Exception ex){
                 ex.printStackTrace();
@@ -96,9 +107,10 @@ public class ImageMatcherJavaFXApp extends Application {
 
         grid.add(chooseButton, 0, 0);
         grid.add(instructions, 0, 1, 3, 1); // 添加说明
-        grid.add(imageView, 0, 8, 3, 1); // 图片显示
-        grid.add(imagePath, 0, 9, 3, 1);
-        grid.add(confirmButton, 0, 10, 3, 1); // 确定按钮
+        grid.add(selectAllCheckBox, 0, 8, 3, 1); // 全选框
+        grid.add(imageView, 0, 9, 3, 1); // 图片显示
+        grid.add(imagePath, 0, 10, 3, 1);
+        grid.add(confirmButton, 0, 11, 3, 1); // 确定按钮
 
         Scene scene = new Scene(grid, 400, 500);
         primaryStage.setScene(scene);

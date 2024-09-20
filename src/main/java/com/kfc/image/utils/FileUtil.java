@@ -1,5 +1,7 @@
 package com.kfc.image.utils;
 
+import org.opencv.core.Mat;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -77,5 +79,20 @@ public class FileUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * 计算mat所占大小
+     * @param mat
+     * @return
+     */
+    public static double calculateMatSizeInMB(Mat mat) {
+        if (mat.empty()) {
+            return 0.0;
+        }
+        long sizeInBytes = mat.elemSize() * mat.total();
+        // 转换为MB
+        return sizeInBytes / (1024.0 * 1024.0);
     }
 }
