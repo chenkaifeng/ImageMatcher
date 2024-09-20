@@ -21,7 +21,7 @@ set "CLASSPATH=lib\image-matcher-1.0-SNAPSHOT.jar;%CLASSPATH%"
 echo CLASSPATH: %CLASSPATH%
 
 :: 执行 Java 应用程序
-java --module-path "javafx-sdk-17.0.12\lib" --add-modules javafx.controls,javafx.fxml -cp "%CLASSPATH%" com.kfc.image.ImageMatcherJavaFXLauncher
+java  -Xms512m -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 --module-path "javafx-sdk-17.0.12\lib" --add-modules javafx.controls,javafx.fxml -cp "%CLASSPATH%" com.kfc.image.ImageMatcherJavaFXLauncher
 
 :: 按任意键继续
-pause
+:: pause
