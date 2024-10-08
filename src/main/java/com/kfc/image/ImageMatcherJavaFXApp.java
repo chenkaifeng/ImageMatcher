@@ -114,7 +114,7 @@ public class ImageMatcherJavaFXApp extends Application {
 
         Scene scene = new Scene(grid, 400, 500);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("图片选择器");
+        primaryStage.setTitle("挖了个宝");
         primaryStage.show();
     }
 

@@ -18,6 +18,12 @@ public class ImageMatcher {
     static {
         // 加载OpenCV库
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // 设置OpenCV的并行线程数为 4
+        //Core.setNumThreads(4);
+
+        // 查看当前 OpenCV 使用的线程数
+        int numThreads = Core.getNumThreads();
+        System.out.println("当前使用的线程数: " + numThreads);
     }
 
 
@@ -30,6 +36,8 @@ public class ImageMatcher {
      * @throws IOException
      */
     public static List<ResultItem> matchForEach(List<ConfigItem> largeFileItems, String smallFilePath) throws IOException {
+
+        long beginTime = System.currentTimeMillis();
 
         //由于路径中带中文的话opencv会报错，重命名图片
         smallFilePath = FileUtil.copyAndRenameSmallImage(smallFilePath);
@@ -151,6 +159,7 @@ public class ImageMatcher {
         outputImg.release();
         FileUtil.delete(smallFilePath);
 
+        System.out.println("总共耗时：" + (System.currentTimeMillis() - beginTime) + "ms");
         return sortedResult;
     }
 }
